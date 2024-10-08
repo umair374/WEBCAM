@@ -18,10 +18,15 @@ namespace WEBCAM
         private VideoCaptureDevice videoSource = null!;
         private FilterInfoCollection videoDevices = null!;
         private string connString = "User Id=hr;Password=123456;Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.1.9)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=orcl)))";
-
+        public int EmployeeId { get; private set; }
         public MainWindow()
         {
             InitializeComponent();
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length > 1 && int.TryParse(args[1], out int empId))
+            {
+                EmployeeId = empId; 
+            }
             this.Closing += MainWindow_Closing;
         }
 
@@ -185,15 +190,21 @@ namespace WEBCAM
                 MessageBox.Show("No image captured to save.");
                 return;
             }
+            
 
             try
             {
-                int employeeId = 0;
-                string input = Microsoft.VisualBasic.Interaction.InputBox("Enter EMPLOYEE ID : ", "UPDATE Image", "1", -1, -1);
+                //int employeeId = 0;
+                //string input = Microsoft.VisualBasic.Interaction.InputBox("Enter EMPLOYEE ID : ", "UPDATE Image", "1", -1, -1);
 
-                if (int.TryParse(input, out int id))
+                //if (int.TryParse(input, out int id))
+                //{
+                //    employeeId = id;
+                //}
+                if (EmployeeId == 0)
                 {
-                    employeeId = id;
+                    MessageBox.Show("Employee ID is not set.");
+                    return;
                 }
 
                 StopCameraFeed();
@@ -211,9 +222,9 @@ namespace WEBCAM
                         {
                             capturedImage.Save(ms, ImageFormat.Jpeg);
                             cmd.Parameters.Add(":ImageData", OracleDbType.LongRaw).Value = ms.ToArray();
-                            cmd.Parameters.Add(":EmployeeId", OracleDbType.Int32).Value = employeeId;
+                            cmd.Parameters.Add(":EmployeeId", OracleDbType.Int32).Value = EmployeeId;
 
-                           // MessageBox.Show("Saving image data...");
+                            // MessageBox.Show("Saving image data...");
                             await cmd.ExecuteNonQueryAsync(); 
                         }
                     }
