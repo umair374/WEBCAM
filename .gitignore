@@ -1,4 +1,6 @@
 #Ignore Installer
 WEBCAM_EMP/
+*.exe
+bin/
 
 
