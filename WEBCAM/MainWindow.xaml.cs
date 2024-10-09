@@ -182,25 +182,83 @@ namespace WEBCAM
             }
         }
 
+        
+        //private async void btnSaveImage_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (capturedImage == null)
+        //    {
+        //        MessageBox.Show("No image captured to save.");
+        //        return;
+        //    }
 
-        private async void btnSaveImage_Click(object sender, RoutedEventArgs e)
+
+        //    try
+        //    {
+        //        //int employeeId = 0;
+        //        //string input = Microsoft.VisualBasic.Interaction.InputBox("Enter EMPLOYEE ID : ", "UPDATE Image", "1", -1, -1);
+
+        //        //if (int.TryParse(input, out int id))
+        //        //{
+        //        //    employeeId = id;
+        //        //}
+        //        if (EmployeeId == 0)
+        //        {
+        //            MessageBox.Show("Employee ID is not set.");
+        //            return;
+        //        }
+
+        //        StopCameraFeed();
+
+        //        using (OracleConnection connection = new OracleConnection(connString))
+        //        {
+
+        //            await connection.OpenAsync(); 
+
+        //            using (OracleCommand cmd = new OracleCommand("UPDATE EMPLOYEE_PROFILE SET PICTURE = :ImageData WHERE EMPLOYEE_ID = :EmployeeId", connection))
+        //            {
+        //                cmd.CommandTimeout = 30; 
+
+        //                using (MemoryStream ms = new MemoryStream())
+        //                {
+        //                    capturedImage.Save(ms, ImageFormat.Jpeg);
+        //                    cmd.Parameters.Add(":ImageData", OracleDbType.LongRaw).Value = ms.ToArray();
+        //                    cmd.Parameters.Add(":EmployeeId", OracleDbType.Int32).Value = EmployeeId;
+
+        //                    // MessageBox.Show("Saving image data...");
+        //                    await cmd.ExecuteNonQueryAsync(); 
+        //                }
+        //            }
+        //        }
+
+        //        MessageBox.Show("Image saved to database.");
+        //        capturedImageDisplay.Source = null;
+        //        CapturedImageGrid.Visibility = Visibility.Collapsed;
+        //        capturedImage = null;
+        //    }
+        //    catch (OracleException ex)
+        //    {
+        //        MessageBox.Show($"Database error: {ex.Message}");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Error saving image to database: {ex.Message}");
+        //    }
+        //    finally
+        //    {
+        //        StartCameraFeed();
+        //    }
+        //}
+
+        private void btnSaveImage_Click(object sender, RoutedEventArgs e)
         {
             if (capturedImage == null)
             {
                 MessageBox.Show("No image captured to save.");
                 return;
             }
-            
 
             try
             {
-                //int employeeId = 0;
-                //string input = Microsoft.VisualBasic.Interaction.InputBox("Enter EMPLOYEE ID : ", "UPDATE Image", "1", -1, -1);
-
-                //if (int.TryParse(input, out int id))
-                //{
-                //    employeeId = id;
-                //}
                 if (EmployeeId == 0)
                 {
                     MessageBox.Show("Employee ID is not set.");
@@ -209,39 +267,26 @@ namespace WEBCAM
 
                 StopCameraFeed();
 
-                using (OracleConnection connection = new OracleConnection(connString))
+                // Convert image to byte array
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    
-                    await connection.OpenAsync(); 
+                    capturedImage.Save(ms, ImageFormat.Jpeg);
+                    byte[] imageData = ms.ToArray();
 
-                    using (OracleCommand cmd = new OracleCommand("UPDATE EMPLOYEE_PROFILE SET PICTURE = :ImageData WHERE EMPLOYEE_ID = :EmployeeId", connection))
-                    {
-                        cmd.CommandTimeout = 30; 
+                    // Save byte array to a shared file location
+                    string filePath = $"\\\\192.168.1.9\\SHARE\\WEBCAM\\PIC\\Employee_{EmployeeId}_Image.jpg";
+                    File.WriteAllBytes(filePath, imageData); 
 
-                        using (MemoryStream ms = new MemoryStream())
-                        {
-                            capturedImage.Save(ms, ImageFormat.Jpeg);
-                            cmd.Parameters.Add(":ImageData", OracleDbType.LongRaw).Value = ms.ToArray();
-                            cmd.Parameters.Add(":EmployeeId", OracleDbType.Int32).Value = EmployeeId;
-
-                            // MessageBox.Show("Saving image data...");
-                            await cmd.ExecuteNonQueryAsync(); 
-                        }
-                    }
+                    MessageBox.Show($"Image saved to file: {filePath}");
                 }
 
-                MessageBox.Show("Image saved to database.");
                 capturedImageDisplay.Source = null;
                 CapturedImageGrid.Visibility = Visibility.Collapsed;
                 capturedImage = null;
             }
-            catch (OracleException ex)
-            {
-                MessageBox.Show($"Database error: {ex.Message}");
-            }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error saving image to database: {ex.Message}");
+                MessageBox.Show($"Error saving image to file: {ex.Message}");
             }
             finally
             {
